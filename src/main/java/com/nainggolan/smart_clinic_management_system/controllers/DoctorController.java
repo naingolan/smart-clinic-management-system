@@ -21,37 +21,42 @@ public class DoctorController {
     @Autowired
     private TokenService tokenService;
 
-    @GetMapping("/availability")
+    @GetMapping("/availability/{user}/{doctorId}/{date}/{token}")
     public ResponseEntity<?> getDoctorAvailability(
-            @RequestParam(required=false) String speciality,
-            @RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTime,
-            @RequestHeader("Authorization") String token){
+            @PathVariable String user,
+            @PathVariable Long doctorId,
+            @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime date,
+            @PathVariable String token) {
 
-        if(!tokenService.validateToken(token.replace("Bearer ", ""))){
+        // Validate token
+        if (!tokenService.validateToken(token)) {
             return ResponseEntity.status(401).body("{\"error\": \"Invalid token\"}");
         }
 
-        List<Doctor> doctors = doctorRepository.findAll();
-        if(speciality !=null){
+        // Retrieve doctor by ID
+        List<Doctor> doctors = doctorRepository.findById(doctorId)
+                .map(List::of)
+                .orElse(List.of());
+
+        // Filter by user (optional, assuming user role or name filter)
+        if (user != null && !user.isEmpty()) {
             doctors = doctors.stream()
-                    .filter(d->d.getSpeciality().equalsIgnoreCase(speciality))
+                    .filter(d -> d.getEmail().equalsIgnoreCase(user) || d.getFirstName().equalsIgnoreCase(user))
                     .toList();
         }
-        if(dateTime!=null){
-            doctors = doctors.stream()
-                    .filter(d->d.getAvailableTimes().stream()
-                            .anyMatch(time->time.isAfter(dateTime) || time.isEqual(dateTime)))
-                    .toList();
 
+        // Filter by date
+        if (date != null) {
+            doctors = doctors.stream()
+                    .filter(d -> d.getAvailableTimes().stream()
+                            .anyMatch(time -> time.isAfter(date) || time.isEqual(date)))
+                    .toList();
         }
 
-        if(doctors.isEmpty()){
+        if (doctors.isEmpty()) {
             return ResponseEntity.status(404).body("{\"message\": \"No doctors available\"}");
         }
 
         return ResponseEntity.ok(doctors);
-
-
-      }
-
+    }
 }
