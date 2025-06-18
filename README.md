@@ -3,8 +3,8 @@
 Welcome to the Smart Clinic Management System, a robust web application designed to streamline clinic operations in an African healthcare context. Built with Spring Boot, this system enables Admins, Patients, and Doctors to manage appointments, patient records, prescriptions, and more. The project leverages JPA for database interactions, RESTful APIs for communication, and stored procedures for reporting.
 
 - **Last Updated**: June 18, 2025
-- **Developed by**: [Your Name or Team Name]
-- **License**: [Specify License, e.g., MIT or Apache 2.0, or "TBD"]
+- **Developed by**: Kelvin Chaula
+- **License**: Apache 2.0
 
 ## Table of Contents
 - [Features](#features)
